@@ -54,8 +54,21 @@ jobs:
       - name: Build (vite + set-backend-url)
         working-directory: ${{ env.WORKING_DIR }}
         env:
+          # BACKEND_URL → substituído no web.config (proxy reverso, usado em VMs)
           BACKEND_URL: ${{ github.event.inputs.backend_url || env.DEFAULT_BACKEND_URL }}
+          # VITE_API_URL → embutido no bundle JS (cliente chama URL absoluta)
+          # Necessário em Azure App Service B1 onde ARR proxy outbound não funciona
+          VITE_API_URL: ${{ github.event.inputs.backend_url || env.DEFAULT_BACKEND_URL }}/api
         run: npm run build
+
+      - name: Verify VITE_API_URL embedded
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          if ! grep -q "fifa2026-back\|${{ github.event.inputs.backend_url || env.DEFAULT_BACKEND_URL }}" dist/assets/*.js; then
+            echo "::error::VITE_API_URL não foi embutido no bundle JS"
+            exit 1
+          fi
+          echo "VITE_API_URL embutido com sucesso"
 
       - name: Verify web.config substitution
         working-directory: ${{ env.WORKING_DIR }}
