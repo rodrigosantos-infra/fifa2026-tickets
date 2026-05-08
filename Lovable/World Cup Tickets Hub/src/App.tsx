@@ -28,6 +28,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const PaymentConfirmation = lazy(() => import("./pages/PaymentConfirmation"));
 const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const TicketVerify = lazy(() => import("./pages/TicketVerify"));
 
 // Admin pages: bundle separado, só carrega para admins.
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
@@ -93,6 +94,7 @@ const App = () => (
                 <Route path="/register" element={<Layout><Register /></Layout>} />
                 <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
                 <Route path="/payment-confirmation" element={<Layout><PaymentConfirmation /></Layout>} />
+                <Route path="/ticket/verify/:id" element={<Layout><TicketVerify /></Layout>} />
                 <Route path="/profile" element={<Layout><Profile /></Layout>} />
                 <Route path="*" element={<Layout><NotFound /></Layout>} />
               </Routes>

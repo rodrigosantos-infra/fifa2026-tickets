@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Check, Download, Printer, Home, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { TicketPDF, TicketData } from '@/components/TicketPDF';
+import { TicketStub, TicketData } from '@/components/TicketStub';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -191,8 +191,8 @@ const PaymentConfirmation: React.FC = () => {
               </div>
 
               {/* Ticket Preview */}
-              <div className="overflow-x-auto rounded-xl border border-border shadow-lg">
-                <TicketPDF
+              <div className="overflow-x-auto rounded-xl shadow-lg">
+                <TicketStub
                   innerRef={(el: HTMLDivElement | null) => { ticketRefs.current[index] = el; }}
                   ticket={ticket}
                 />
