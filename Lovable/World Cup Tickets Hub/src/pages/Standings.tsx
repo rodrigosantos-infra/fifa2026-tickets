@@ -4,14 +4,6 @@ import { toast } from 'sonner';
 import { Trophy, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { TeamFlag } from '@/components/TeamFlag';
 import api, { type StandingRow } from '@/lib/api';
 
@@ -45,71 +37,74 @@ const Standings: React.FC = () => {
           </p>
         </div>
 
-        {/* Grid de cards por grupo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Grid de cards: 1 col mobile, 2 em md, 3 só em xl (1280+) — evita squeeze */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {isLoading
-            ? [1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-80 w-full rounded-2xl" />)
+            ? [1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-72 w-full rounded-2xl" />)
             : groups.map((g) => (
                 <Card
                   key={g}
                   className="rounded-2xl bg-card border-border hover:border-primary/50 transition-all duration-300 overflow-hidden"
                 >
-                  <CardHeader className="bg-gradient-to-r from-primary/20 to-primary/5 border-b border-border">
+                  <CardHeader className="bg-gradient-to-r from-primary/20 to-primary/5 border-b border-border py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="font-display text-xl text-primary">{g}</span>
+                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="font-display text-lg text-primary">{g}</span>
                       </div>
-                      <CardTitle className="font-display text-lg">Grupo {g}</CardTitle>
+                      <CardTitle className="font-display text-base">Grupo {g}</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-8 text-center">#</TableHead>
-                          <TableHead>Seleção</TableHead>
-                          <TableHead className="text-center w-8">J</TableHead>
-                          <TableHead className="text-center w-8">V</TableHead>
-                          <TableHead className="text-center w-8">E</TableHead>
-                          <TableHead className="text-center w-8">D</TableHead>
-                          <TableHead className="text-center w-10">GP</TableHead>
-                          <TableHead className="text-center w-10">GC</TableHead>
-                          <TableHead className="text-center w-10">SG</TableHead>
-                          <TableHead className="text-center w-10 font-bold">P</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
+                    {/* Tabela compacta com table-fixed: todas as colunas cabem sem rolagem.
+                        Usa <table> nativa em vez do shadcn Table (padding default grande). */}
+                    <table className="w-full text-xs table-fixed">
+                      <thead className="bg-muted/30 text-muted-foreground">
+                        <tr>
+                          <th className="px-1 py-2 text-center font-medium" style={{ width: '8%' }}>#</th>
+                          <th className="px-1 py-2 text-left font-medium" style={{ width: '20%' }}>Time</th>
+                          <th className="px-0 py-2 text-center font-medium" style={{ width: '8%' }}>J</th>
+                          <th className="px-0 py-2 text-center font-medium" style={{ width: '8%' }}>V</th>
+                          <th className="px-0 py-2 text-center font-medium" style={{ width: '8%' }}>E</th>
+                          <th className="px-0 py-2 text-center font-medium" style={{ width: '8%' }}>D</th>
+                          <th className="px-0 py-2 text-center font-medium" style={{ width: '9%' }}>GP</th>
+                          <th className="px-0 py-2 text-center font-medium" style={{ width: '9%' }}>GC</th>
+                          <th className="px-0 py-2 text-center font-medium" style={{ width: '10%' }}>SG</th>
+                          <th className="px-1 py-2 text-center font-bold text-foreground" style={{ width: '12%' }}>P</th>
+                        </tr>
+                      </thead>
+                      <tbody>
                         {standings[g].map((row: StandingRow, idx) => (
-                          <TableRow
+                          <tr
                             key={row.team_id}
-                            className={idx < 2 ? 'bg-primary/5' : ''}
+                            className={`border-t border-border ${idx < 2 ? 'bg-primary/5' : ''}`}
                           >
-                            <TableCell className="text-center font-medium">
-                              <div className="flex items-center justify-center gap-1">
-                                {idx < 2 && <Trophy className="w-3 h-3 text-gold" />}
-                                {idx + 1}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
+                            <td className="px-1 py-2 text-center font-medium">
+                              {idx < 2 ? (
+                                <Trophy className="w-3 h-3 text-gold inline" aria-label={`${idx + 1}º`} />
+                              ) : (
+                                idx + 1
+                              )}
+                            </td>
+                            <td className="px-1 py-2 text-left">
+                              <div className="flex items-center gap-1.5">
                                 <TeamFlag flag={row.team_flag} name={row.team_name} size="sm" />
-                                <span className="text-sm font-medium">{row.team_code}</span>
+                                <span className="font-medium">{row.team_code}</span>
                               </div>
-                            </TableCell>
-                            <TableCell className="text-center text-sm">{row.played}</TableCell>
-                            <TableCell className="text-center text-sm">{row.won}</TableCell>
-                            <TableCell className="text-center text-sm">{row.drawn}</TableCell>
-                            <TableCell className="text-center text-sm">{row.lost}</TableCell>
-                            <TableCell className="text-center text-sm">{row.gf}</TableCell>
-                            <TableCell className="text-center text-sm">{row.ga}</TableCell>
-                            <TableCell className="text-center text-sm">
+                            </td>
+                            <td className="px-0 py-2 text-center">{row.played}</td>
+                            <td className="px-0 py-2 text-center">{row.won}</td>
+                            <td className="px-0 py-2 text-center">{row.drawn}</td>
+                            <td className="px-0 py-2 text-center">{row.lost}</td>
+                            <td className="px-0 py-2 text-center">{row.gf}</td>
+                            <td className="px-0 py-2 text-center">{row.ga}</td>
+                            <td className="px-0 py-2 text-center">
                               {row.gd >= 0 ? `+${row.gd}` : row.gd}
-                            </TableCell>
-                            <TableCell className="text-center font-bold">{row.points}</TableCell>
-                          </TableRow>
+                            </td>
+                            <td className="px-1 py-2 text-center font-bold">{row.points}</td>
+                          </tr>
                         ))}
-                      </TableBody>
-                    </Table>
+                      </tbody>
+                    </table>
                   </CardContent>
                 </Card>
               ))}
