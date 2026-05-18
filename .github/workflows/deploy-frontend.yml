@@ -55,16 +55,17 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}
         env:
           # BACKEND_URL → substituído no web.config (proxy reverso, usado em VMs)
-          BACKEND_URL: ${{ github.event.inputs.backend_url || env.DEFAULT_BACKEND_URL }}
+          # Precedência: input manual → GitHub Variable (aluno) → default (prod legado)
+          BACKEND_URL: ${{ github.event.inputs.backend_url || vars.BACKEND_URL || env.DEFAULT_BACKEND_URL }}
           # VITE_API_URL → embutido no bundle JS (cliente chama URL absoluta)
           # Necessário em Azure App Service B1 onde ARR proxy outbound não funciona
-          VITE_API_URL: ${{ github.event.inputs.backend_url || env.DEFAULT_BACKEND_URL }}/api
+          VITE_API_URL: ${{ github.event.inputs.backend_url || vars.BACKEND_URL || env.DEFAULT_BACKEND_URL }}/api
         run: npm run build
 
       - name: Verify VITE_API_URL embedded
         working-directory: ${{ env.WORKING_DIR }}
         run: |
-          if ! grep -q "fifa2026-back\|${{ github.event.inputs.backend_url || env.DEFAULT_BACKEND_URL }}" dist/assets/*.js; then
+          if ! grep -q "fifa2026-back\|${{ github.event.inputs.backend_url || vars.BACKEND_URL || env.DEFAULT_BACKEND_URL }}" dist/assets/*.js; then
             echo "::error::VITE_API_URL não foi embutido no bundle JS"
             exit 1
           fi
@@ -83,6 +84,7 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ github.event.inputs.app_name || env.DEFAULT_APP_NAME }}
+          # Precedência: input manual → GitHub Variable (aluno) → default (prod legado)
+          app-name: ${{ github.event.inputs.app_name || vars.FRONTEND_APP_NAME || env.DEFAULT_APP_NAME }}
           publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
           package: '${{ env.WORKING_DIR }}/dist'
